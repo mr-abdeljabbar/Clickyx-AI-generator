@@ -16,13 +16,7 @@ function App() {
   const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    const hasSession = localStorage.getItem('hasSession') === 'true';
-    if (hasSession) {
-      checkAuth();
-    } else {
-      // If no session flag, we skip the API call and stop loading
-      useAuthStore.setState({ isLoading: false });
-    }
+    checkAuth();
   }, [checkAuth]);
 
   return (

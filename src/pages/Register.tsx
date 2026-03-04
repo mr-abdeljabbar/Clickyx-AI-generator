@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -8,10 +8,12 @@ const Register = () => {
   const { register } = useAuthStore();
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters long');
@@ -20,9 +22,13 @@ const Register = () => {
 
     try {
       const response = await register({ email, password });
-      setError(''); // Clear any previous errors
-      alert(response?.data?.message || 'Registration successful! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
+      setError('');
+      setSuccess(response?.data?.message || 'Registration successful! Redirecting to login...');
+
+      // Delay redirect slightly so user can see they were successful
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.response?.data?.errors?.[0]?.message || 'Registration failed';
       setError(errorMessage);
@@ -34,6 +40,7 @@ const Register = () => {
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 w-full max-w-md">
         <h2 className="text-3xl font-bold mb-6 text-center text-slate-900">Create Account</h2>
         {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mb-6 text-sm">{error}</div>}
+        {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-lg mb-6 text-sm">{success}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>

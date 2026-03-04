@@ -15,7 +15,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: any) => Promise<void>;
-  register: (credentials: any) => Promise<void>;
+  register: (credentials: any) => Promise<any>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   setUser: (user: User | null) => void;
@@ -39,9 +39,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
   register: async (credentials) => {
-    await api.post('/auth/register', credentials);
-    // Registration doesn't auto-login in this implementation, 
-    // but if it did, we would set hasSession here.
+    return await api.post('/auth/register', credentials);
   },
   logout: async () => {
     try {
