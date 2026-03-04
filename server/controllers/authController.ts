@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
-import prisma from '../prisma.js';
-import { generateAccessToken, generateRefreshToken, setRefreshTokenCookie } from '../utils/jwt.js';
-import { registerSchema, loginSchema } from '../utils/validation.js';
+import prisma from '../prisma';
+import { generateAccessToken, generateRefreshToken, setRefreshTokenCookie, verifyRefreshToken } from '../utils/jwt';
+import { registerSchema, loginSchema } from '../utils/validation';
 import { OAuth2Client } from 'google-auth-library';
-import { AuthRequest } from '../middleware/authMiddleware.js';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -24,13 +24,12 @@ export const register = async (req: Request, res: Response) => {
       data: {
         email,
         password: hashedPassword,
-        credits: 0, // Free credits only after verification
+        credits: 3, // Initial free credits
+        isEmailVerified: true, // Auto-verify for now (using the correct DB field name)
       },
     });
 
-    // TODO: Send verification email
-    // For now, we'll just return success
-    res.status(201).json({ message: 'User created. Please verify your email.' });
+    res.status(201).json({ message: 'User created successfully. You have 3 free credits!' });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.issues });
@@ -86,7 +85,7 @@ export const googleLogin = async (req: Request, res: Response) => {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-    
+
     if (!payload || !payload.email) {
       return res.status(400).json({ message: 'Invalid Google token' });
     }
@@ -97,7 +96,7 @@ export const googleLogin = async (req: Request, res: Response) => {
       user = await prisma.user.create({
         data: {
           email: payload.email,
-          isVerified: true, // Google emails are verified
+          isEmailVerified: true, // Google emails are verified
           credits: 3, // Free credits
           plan: 'FREE',
         },
@@ -132,25 +131,53 @@ export const refreshToken = async (req: Request, res: Response) => {
     const storedToken = await prisma.refreshToken.findUnique({ where: { token: refreshToken } });
     if (!storedToken) return res.sendStatus(403);
 
-    // Verify token (if expired or invalid)
-    // ... verification logic ...
-    
-    // Rotate token
-    await prisma.refreshToken.delete({ where: { id: storedToken.id } });
+    // Grace Period: If token was recently revoked (within 60s), allow issuing a new access token
+    // but don't rotate the refresh token again to avoid race conditions.
+    if (storedToken.revokedAt) {
+      const revokedTime = new Date(storedToken.revokedAt).getTime();
+      const now = Date.now();
+      if (now - revokedTime < 60000) { // 60 second grace period
+        const user = await prisma.user.findUnique({ where: { id: storedToken.userId } });
+        if (!user) return res.sendStatus(403);
+        const accessToken = generateAccessToken(user.id, user.role);
+        return res.json({ accessToken });
+      }
+      return res.sendStatus(403);
+    }
 
-    const newAccessToken = generateAccessToken(storedToken.userId, 'USER'); // Need to fetch user role
-    const newRefreshToken = generateRefreshToken(storedToken.userId);
+    // Verify token
+    let decoded: any;
+    try {
+      decoded = verifyRefreshToken(refreshToken);
+    } catch (err) {
+      return res.sendStatus(403);
+    }
 
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) return res.sendStatus(403);
+
+    // Rotate token with grace period
+    const newAccessToken = generateAccessToken(user.id, user.role);
+    const newRefreshToken = generateRefreshToken(user.id);
+
+    // Update old token as revoked instead of deleting
+    await prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revokedAt: new Date() },
+    });
+
+    // Create new token
     await prisma.refreshToken.create({
       data: {
         token: newRefreshToken,
-        userId: storedToken.userId,
+        userId: user.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       },
     });
 
-    setRefreshTokenCookie(res, newRefreshToken);
+    // Cleanup very old revoked tokens occasionally (optional, but keep it simple for now)
 
+    setRefreshTokenCookie(res, newRefreshToken);
     res.json({ accessToken: newAccessToken });
   } catch (error) {
     console.error(error);

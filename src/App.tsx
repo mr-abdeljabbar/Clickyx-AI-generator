@@ -16,7 +16,13 @@ function App() {
   const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
+    const hasSession = localStorage.getItem('hasSession') === 'true';
+    if (hasSession) {
+      checkAuth();
+    } else {
+      // If no session flag, we skip the API call and stop loading
+      useAuthStore.setState({ isLoading: false });
+    }
   }, [checkAuth]);
 
   return (
@@ -26,7 +32,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/generate" element={<Generator />} />

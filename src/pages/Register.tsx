@@ -11,11 +11,21 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
     try {
-      await register({ email, password });
-      navigate('/login');
+      const response = await register({ email, password });
+      setError(''); // Clear any previous errors
+      alert(response?.data?.message || 'Registration successful! Redirecting to login...');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const errorMessage = err.response?.data?.message || err.response?.data?.errors?.[0]?.message || 'Registration failed';
+      setError(errorMessage);
     }
   };
 

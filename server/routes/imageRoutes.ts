@@ -1,6 +1,6 @@
 import express from 'express';
-import { generate, getHistory } from '../controllers/imageController.js';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import { generate, getHistory } from '../controllers/imageController';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 

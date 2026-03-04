@@ -6,10 +6,10 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import authRoutes from './server/routes/authRoutes.js';
-import imageRoutes from './server/routes/imageRoutes.js';
-import paymentRoutes from './server/routes/paymentRoutes.js';
-import adminRoutes from './server/routes/adminRoutes.js';
+import authRoutes from './server/routes/authRoutes';
+import imageRoutes from './server/routes/imageRoutes';
+import paymentRoutes from './server/routes/paymentRoutes';
+import adminRoutes from './server/routes/adminRoutes';
 
 // Load environment variables
 dotenv.config();
@@ -19,19 +19,19 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 5000;
 
   // Security Middleware
   app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for dev/iframe compatibility
     crossOriginEmbedderPolicy: false,
   }));
-  
+
   app.use(cors({
     origin: process.env.APP_URL || 'http://localhost:3000',
     credentials: true,
   }));
-  
+
   app.use(express.json());
   app.use(cookieParser());
 
@@ -40,7 +40,7 @@ async function startServer() {
   app.use('/api/generate', imageRoutes);
   app.use('/api/payments', paymentRoutes);
   app.use('/api/admin', adminRoutes);
-  
+
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });

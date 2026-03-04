@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,93 +7,195 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                  String              @id @default(uuid())
+  email               String              @unique
+  password            String?
+  name                String?
+  avatar              String?
+  role                Role                @default(USER)
+  isEmailVerified     Boolean             @default(false)
+  isBanned            Boolean             @default(false)
+  failedLoginAttempts Int                 @default(0)
+  lockedUntil         DateTime?
+  googleId            String?             @unique
+  credits             Int                 @default(0)
+  plan                PlanType            @default(FREE)
+  planExpiresAt       DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  creditTransactions  CreditTransaction[]
+  generatedImages     GeneratedImage[]
+  payments            Payment[]
+  refreshTokens       RefreshToken[]
+  subscriptions       Subscription[]
+  verificationTokens  VerificationToken[]
+
+  @@index([email])
+  @@index([googleId])
+  @@index([isBanned])
+  @@index([plan])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  type      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String
+  paypalSubscriptionId String?            @unique
+  plan                 PlanType
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([paypalSubscriptionId])
+  @@index([status])
+  @@index([userId])
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  userId          String
+  paypalPaymentId String?  @unique
+  paypalOrderId   String?
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  plan            PlanType
+  status          String
+  description     String?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([paypalPaymentId])
+  @@index([status])
+  @@index([userId])
+}
+
+model CreditTransaction {
+  id           String          @id @default(uuid())
+  userId       String
+  amount       Int
+  type         TransactionType
+  description  String?
+  balanceAfter Int
+  metadata     Json?
+  createdAt    DateTime        @default(now())
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([userId])
+}
+
+model GeneratedImage {
+  id             String   @id @default(uuid())
+  userId         String
+  prompt         String
+  negativePrompt String?
+  imageUrl       String
+  r2Key          String
+  width          Int      @default(1024)
+  height         Int      @default(1024)
+  creditsUsed    Int      @default(1)
+  model          String   @default("@cf/stabilityai/stable-diffusion-xl-base-1.0")
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id
+  adminId   String
+  action    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@index([targetId])
+}
+
+model FailedAttempt {
+  id        String   @id
+  ip        String
+  email     String?
+  type      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([ip])
+}
+
+model Plan {
+  id           String   @id
+  name         String   @unique
+  displayName  String
+  price        Decimal? @db.Decimal(10, 2)
+  credits      Int
+  isMonthly    Boolean  @default(true)
+  description  String?
+  features     String[]
+  paypalPlanId String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+}
+
 enum Role {
   USER
   ADMIN
 }
 
-enum Plan {
+enum PlanType {
   FREE
   PRO
   LIFETIME
 }
 
-model User {
-  id                 String              @id @default(uuid())
-  email              String              @unique
-  password           String?
-  role               Role                @default(USER)
-  isVerified         Boolean             @default(false)
-  credits            Int                 @default(0)
-  plan               Plan                @default(FREE)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  
-  refreshTokens      RefreshToken[]
-  verificationTokens VerificationToken[]
-  subscriptions      Subscription[]
-  payments           Payment[]
-  creditTransactions CreditTransaction[]
-  generatedImages    GeneratedImage[]
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
 }
 
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-model VerificationToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-model Subscription {
-  id               String   @id @default(uuid())
-  paypalSubId      String   @unique
-  userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status           String   // ACTIVE, CANCELLED, EXPIRED
-  plan             Plan
-  startDate        DateTime @default(now())
-  endDate          DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
-model Payment {
-  id               String   @id @default(uuid())
-  paypalOrderId    String   @unique
-  userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount           Float
-  currency         String
-  status           String   // COMPLETED, PENDING, FAILED
-  createdAt        DateTime @default(now())
-}
-
-model CreditTransaction {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount    Int      // Positive for add, negative for deduct
-  type      String   // GENERATION, PURCHASE, SUBSCRIPTION, ADMIN_ADJUSTMENT, INITIAL_GRANT
-  createdAt DateTime @default(now())
-}
-
-model GeneratedImage {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  prompt      String
-  imageUrl    String   // R2 URL
-  creditsUsed Int      @default(1)
-  createdAt   DateTime @default(now())
+enum TransactionType {
+  CREDIT_ADDED
+  CREDIT_DEDUCTED
+  CREDIT_RESET
+  MANUAL_ADJUSTMENT
+  REFUND
 }

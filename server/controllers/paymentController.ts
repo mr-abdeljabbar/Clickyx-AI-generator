@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import prisma from '../prisma.js';
+import prisma from '../prisma';
 
 export const handleWebhook = async (req: Request, res: Response) => {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   // TODO: Verify signature using webhookId and req.headers
-  
+
   const event = req.body;
   const eventType = event.event_type;
   const resource = event.resource;
@@ -12,64 +12,81 @@ export const handleWebhook = async (req: Request, res: Response) => {
   try {
     if (eventType === 'BILLING.SUBSCRIPTION.ACTIVATED') {
       const subscriptionId = resource.id;
-      const userId = resource.custom_id; // Assuming we pass userId as custom_id
-      
-      if (userId) {
+      const customId = resource.custom_id; // Using custom_id from PayPal subscription
+
+      if (customId) {
         await prisma.user.update({
-          where: { id: userId },
-          data: { plan: 'PRO', credits: { increment: 50 } }, // Grant initial 50 credits? Or just set plan?
-          // User said "50 credits per month".
-          // We should probably set a subscription record.
+          where: { id: customId },
+          data: {
+            plan: 'PRO',
+            credits: { increment: 50 },
+            isEmailVerified: true, // Assuming payment verifies email
+          },
         });
-        
+
         await prisma.subscription.create({
           data: {
-            paypalSubId: subscriptionId,
-            userId,
+            paypalSubscriptionId: subscriptionId,
+            userId: customId,
             status: 'ACTIVE',
             plan: 'PRO',
+          },
+        });
+
+        await prisma.creditTransaction.create({
+          data: {
+            userId: customId,
+            amount: 50,
+            type: 'CREDIT_ADDED',
+            description: 'Monthly PRO subscription credits',
+            balanceAfter: (await prisma.user.findUnique({ where: { id: customId } }))?.credits || 50,
           },
         });
       }
     } else if (eventType === 'BILLING.SUBSCRIPTION.CANCELLED' || eventType === 'BILLING.SUBSCRIPTION.EXPIRED') {
       const subscriptionId = resource.id;
-      const subscription = await prisma.subscription.findUnique({ where: { paypalSubId: subscriptionId } });
-      
+      const subscription = await prisma.subscription.findUnique({ where: { paypalSubscriptionId: subscriptionId } });
+
       if (subscription) {
         await prisma.subscription.update({
           where: { id: subscription.id },
-          data: { status: 'CANCELLED', endDate: new Date() },
+          data: { status: 'CANCELLED', cancelledAt: new Date() },
         });
-        
+
         await prisma.user.update({
           where: { id: subscription.userId },
           data: { plan: 'FREE' },
         });
       }
     } else if (eventType === 'PAYMENT.SALE.COMPLETED') {
-        // Handle one-time payment for Lifetime
-        // Check if it's a subscription payment or one-time
-        // If resource.billing_agreement_id is present, it's a subscription payment.
-        // If not, and amount is $50, it might be Lifetime.
-        // We need a way to distinguish.
-        // Assuming custom_id contains "LIFETIME_USERID" or similar.
-        const customId = resource.custom; // PayPal uses 'custom' for one-time payments
-        if (customId && customId.startsWith('LIFETIME_')) {
-            const userId = customId.split('_')[1];
-            await prisma.user.update({
-                where: { id: userId },
-                data: { plan: 'LIFETIME', credits: { increment: 150 } },
-            });
-            await prisma.payment.create({
-                data: {
-                    paypalOrderId: resource.id,
-                    userId,
-                    amount: parseFloat(resource.amount.total),
-                    currency: resource.amount.currency,
-                    status: 'COMPLETED',
-                }
-            });
-        }
+      const customId = resource.custom;
+      if (customId && customId.startsWith('LIFETIME_')) {
+        const userId = customId.split('_')[1];
+        await prisma.user.update({
+          where: { id: userId },
+          data: { plan: 'LIFETIME', credits: { increment: 150 } },
+        });
+        await prisma.payment.create({
+          data: {
+            paypalPaymentId: resource.id,
+            userId,
+            amount: parseFloat(resource.amount.total),
+            currency: resource.amount.currency,
+            plan: 'LIFETIME',
+            status: 'COMPLETED',
+          }
+        });
+
+        await prisma.creditTransaction.create({
+          data: {
+            userId,
+            amount: 150,
+            type: 'CREDIT_ADDED',
+            description: 'Lifetime purchase credits',
+            balanceAfter: (await prisma.user.findUnique({ where: { id: userId } }))?.credits || 150,
+          },
+        });
+      }
     }
 
     res.sendStatus(200);

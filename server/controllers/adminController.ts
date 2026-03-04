@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import prisma from '../prisma.js';
-import { AuthRequest } from '../middleware/authMiddleware.js';
+import prisma from '../prisma';
+import { AuthRequest } from '../middleware/authMiddleware';
 
 export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
@@ -27,11 +27,13 @@ export const adjustCredits = async (req: AuthRequest, res: Response) => {
       data: {
         userId,
         amount,
-        type: 'ADMIN_ADJUSTMENT',
+        type: 'MANUAL_ADJUSTMENT', // Updated to match DB enum TransactionType
+        balanceAfter: user.credits,
       },
     });
     res.json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Failed to adjust credits' });
   }
 };
@@ -56,8 +58,9 @@ export const getStats = async (req: AuthRequest, res: Response) => {
     const totalPayments = await prisma.payment.aggregate({
       _sum: { amount: true },
     });
-    res.json({ totalUsers, totalImages, totalRevenue: totalPayments._sum.amount || 0 });
+    res.json({ totalUsers, totalImages, totalRevenue: Number(totalPayments._sum.amount) || 0 });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Failed to fetch stats' });
   }
 };
