@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 
@@ -27,74 +27,97 @@ const Generator = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-slate-900">Generate Image</h1>
-      
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-        <form onSubmit={handleGenerate} className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-10">
+      <div className="flex items-center gap-6 mb-2">
+        <h1 className="text-4xl font-black text-foreground uppercase tracking-tighter neon-glow">Neural Interface</h1>
+        <div className="flex-grow h-px bg-white/5" />
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+          <span className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">Labs: v4.2</span>
+        </div>
+      </div>
+
+      <div className="tech-card p-8">
+        <form onSubmit={handleGenerate} className="space-y-8">
           <div>
-            <label htmlFor="prompt" className="block text-sm font-medium text-slate-700 mb-2">
-              Prompt
-            </label>
-            <div className="relative">
+            <div className="flex justify-between items-center mb-4">
+              <label htmlFor="prompt" className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
+                Neural Directive [Prompt]
+              </label>
+              <span className="text-[10px] font-mono text-muted-foreground opacity-50 uppercase">Input: Text/Alpha</span>
+            </div>
+            <div className="relative group">
               <textarea
                 id="prompt"
-                className="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all h-32 resize-none text-slate-900 placeholder:text-slate-400"
+                className="w-full p-6 bg-black/20 border border-white/10 rounded-2xl focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary/50 transition-all h-40 resize-none text-foreground font-medium placeholder:text-muted-foreground/30 shadow-inner"
                 placeholder="A futuristic city with flying cars at sunset, cyberpunk style..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 required
               />
+              <div className="absolute bottom-4 right-4 text-[10px] font-mono text-muted-foreground pointer-events-none">
+                UTF-8 // SYSIO
+              </div>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Be descriptive for better results.
-            </p>
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="btn-primary-tech w-full py-4 uppercase tracking-[0.2em] text-xs"
           >
             {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Generating...
+              <span className="flex items-center gap-4">
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                Processing Synapses...
               </span>
-            ) : 'Generate Image (1 Credit)'}
+            ) : (
+              <span className="flex items-center gap-2">
+                Initiate Generation <span className="opacity-50 font-mono text-[10px]">[1_CRED]</span>
+              </span>
+            )}
           </button>
         </form>
 
         {error && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
+          <div className="mt-8 p-4 bg-red-500/5 border border-red-500/20 rounded-xl text-red-500 text-[10px] font-black uppercase tracking-widest text-center shadow-[0_0_15px_theme(colors.red.500/10)]">
+            Critical Error: {error}
           </div>
         )}
 
         {image && (
-          <div className="mt-8 pt-8 border-t border-slate-100 animate-in fade-in duration-500">
-            <h3 className="text-lg font-semibold mb-4 text-slate-900">Result</h3>
-            <div className="relative group rounded-xl overflow-hidden shadow-lg bg-slate-100">
-              <img 
-                src={image} 
-                alt="Generated" 
-                className="w-full h-auto object-cover"
+          <div className="mt-12 pt-12 border-t border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-6">Generated Synthesis</h3>
+            <div className="relative group rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40">
+              <img
+                src={image}
+                alt="Generated"
+                className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-700"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <a
-                  href={image}
-                  download="generated-image.png"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download High Res
-                </a>
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center p-6 text-center">
+                <div className="hud-border p-8 flex flex-col items-center gap-6">
+                  <p className="text-xs font-medium text-foreground max-w-xs line-clamp-3 mb-2">{prompt}</p>
+                  <a
+                    href={image}
+                    download="neural-synthesis.png"
+                    className="btn-primary-tech px-8 text-xs uppercase tracking-widest"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Archive Asset
+                  </a>
+                </div>
               </div>
+            </div>
+
+            <div className="mt-6 flex justify-between items-center px-2">
+              <div className="flex gap-1.5">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-1 h-1 bg-primary/30 rounded-full" />
+                ))}
+              </div>
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Asset // ID_9942X</span>
             </div>
           </div>
         )}

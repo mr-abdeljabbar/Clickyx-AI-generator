@@ -38,72 +38,91 @@ const Admin = () => {
 
   if (loading) return (
     <div className="flex justify-center py-20">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
   );
 
   return (
-    <>
-      <h1 className="text-3xl font-bold mb-8 text-slate-900">Admin Panel</h1>
-      
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-slate-500 uppercase text-xs font-semibold tracking-wider">Total Users</h3>
-          <p className="text-3xl font-bold text-indigo-600 mt-2">{stats?.totalUsers || 0}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-slate-500 uppercase text-xs font-semibold tracking-wider">Total Images</h3>
-          <p className="text-3xl font-bold text-indigo-600 mt-2">{stats?.totalImages || 0}</p>
-        </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-slate-500 uppercase text-xs font-semibold tracking-wider">Total Revenue</h3>
-          <p className="text-3xl font-bold text-emerald-600 mt-2">${stats?.totalRevenue || 0}</p>
+    <div className="space-y-10">
+      <div className="flex items-center gap-6 mb-2">
+        <h1 className="text-4xl font-black text-foreground uppercase tracking-tighter neon-glow">Central Control</h1>
+        <div className="flex-grow h-px bg-white/5" />
+        <div className="hidden sm:flex items-center gap-2">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_theme(colors.emerald.500/50)]" />
+          <span className="text-[10px] font-mono font-bold text-emerald-500 uppercase tracking-widest">Authority: Root_Link</span>
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: 'Neural Nodes', value: stats?.totalUsers || 0, color: 'text-primary' },
+          { label: 'Synapse Assets', value: stats?.totalImages || 0, color: 'text-secondary' },
+          { label: 'Revenue Stream', value: `$${stats?.totalRevenue || 0}`, color: 'text-emerald-500' }
+        ].map((stat, i) => (
+          <div key={i} className="tech-card p-6 relative group overflow-hidden">
+            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+              <div className="w-12 h-12 border-t-2 border-r-2 border-primary" />
+            </div>
+            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">{stat.label}</h3>
+            <p className={`text-4xl font-black ${stat.color} tracking-tighter`}>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
       {/* Users Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-6 border-b border-slate-200">
-          <h2 className="text-lg font-bold text-slate-900">Users</h2>
+      <div className="tech-card overflow-hidden">
+        <div className="p-6 border-b border-white/5 bg-white/2 flex justify-between items-center">
+          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Entity Directory</h2>
+          <div className="text-[10px] font-mono text-muted-foreground uppercase opacity-50">Filter: All_Entries</div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-50">
+            <thead className="bg-white/2 border-b border-white/5">
               <tr>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Plan</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Credits</th>
-                <th className="px-6 py-3 text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                {['Pointer', 'Privilege', 'Tier', 'Power', 'Command'].map((h, i) => (
+                  <th key={i} className="px-6 py-4 text-[10px] font-black text-primary uppercase tracking-widest">{h}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-white/5">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-900">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800'
-                    }`}>
+                <tr key={user.id} className="hover:bg-white/5 transition-colors group">
+                  <td className="px-6 py-5 text-sm font-medium text-foreground">{user.email}</td>
+                  <td className="px-6 py-5">
+                    <span className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-widest ${user.role === 'ADMIN'
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'bg-white/5 text-muted-foreground border border-white/10'
+                      }`}>
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{user.plan}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{user.credits}</td>
-                  <td className="px-6 py-4 text-sm space-x-2">
-                    <button
-                      onClick={() => handleAdjustCredits(user.id, 10)}
-                      className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      +10
-                    </button>
-                    <button
-                      onClick={() => handleAdjustCredits(user.id, -10)}
-                      className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      -10
-                    </button>
+                  <td className="px-6 py-5 text-sm font-mono text-muted-foreground uppercase tracking-wider">{user.plan}</td>
+                  <td className="px-6 py-5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-foreground">{user.credits}</span>
+                      <div className="w-8 h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary" style={{ width: `${Math.min(100, (user.credits / 100) * 100)}%` }} />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAdjustCredits(user.id, 10)}
+                        className="p-2 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10 rounded transition-all"
+                        title="+10 Credits"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-60H6" /></svg>
+                      </button>
+                      <button
+                        onClick={() => handleAdjustCredits(user.id, -10)}
+                        className="p-2 border border-red-500/20 text-red-500 hover:bg-red-500/10 rounded transition-all"
+                        title="-10 Credits"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" /></svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -111,7 +130,7 @@ const Admin = () => {
           </table>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

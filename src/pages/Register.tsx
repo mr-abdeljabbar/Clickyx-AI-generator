@@ -37,26 +37,45 @@ const Register = () => {
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center text-slate-900">Create Account</h2>
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mb-6 text-sm">{error}</div>}
-        {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-lg mb-6 text-sm">{success}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+      <div className="tech-card p-10 w-full max-w-md relative overflow-hidden">
+        {/* HUD Elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-secondary to-transparent opacity-50" />
+
+        <div className="text-center mb-10">
+          <div className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-4 opacity-50">System Initialization</div>
+          <h2 className="text-4xl font-black text-foreground uppercase tracking-tighter neon-glow">Create Account</h2>
+        </div>
+
+        {error && (
+          <div className="bg-red-500/5 border border-red-500/20 text-red-500 p-4 rounded-xl mb-8 text-[10px] font-black uppercase tracking-widest text-center shadow-[0_0_15px_theme(colors.red.500/10)]">
+            Registry Error: {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-emerald-500/5 border border-emerald-500/20 text-emerald-500 p-4 rounded-xl mb-8 text-[10px] font-black uppercase tracking-widest text-center shadow-[0_0_15px_theme(colors.emerald.500/10)] animate-pulse">
+            Success: {success}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase ml-1">Target Address [Email]</label>
             <input
               type="email"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full px-5 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-secondary focus:border-secondary/50 text-foreground font-medium transition-all placeholder:text-muted-foreground/20"
+              placeholder="entity@net.core"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase ml-1">Secure Matrix [Password]</label>
             <input
               type="password"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full px-5 py-3 bg-black/20 border border-white/10 rounded-xl focus:outline-none focus:ring-1 focus:ring-secondary focus:border-secondary/50 text-foreground font-medium transition-all placeholder:text-muted-foreground/20"
+              placeholder="Min. 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -64,14 +83,18 @@ const Register = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm"
+            className="btn-primary-tech w-full py-4 text-xs uppercase tracking-[0.2em] mt-4 bg-secondary shadow-secondary/20"
+            style={{ backgroundColor: 'var(--color-secondary)', color: 'var(--color-secondary-foreground)' }}
           >
-            Sign Up
+            Finalize Registry
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-slate-600">
-          Already have an account? <Link to="/login" className="text-indigo-600 hover:text-indigo-700 font-medium">Log in</Link>
-        </p>
+
+        <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
+          <p className="text-xs text-muted-foreground font-medium">
+            Existing Node? <Link to="/login" className="text-secondary hover:text-secondary/80 font-black uppercase tracking-widest ml-1 transition-colors">Access Terminal</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

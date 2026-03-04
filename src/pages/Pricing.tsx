@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 
 interface PayPalHostedButtonProps {
   hostedButtonId: string;
@@ -104,93 +105,109 @@ const Pricing = () => {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-slate-900 mb-4">Simple, Transparent Pricing</h1>
-        <p className="text-lg text-slate-600">Choose the plan that best fits your needs.</p>
-      </div>
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="text-center mb-16"
+      >
+        <h1 className="text-5xl font-black text-foreground uppercase tracking-tighter neon-glow mb-4">Neural Access Plans</h1>
+        <p className="text-lg text-muted-foreground font-medium">Select your node tier to unlock advanced synaptic processing.</p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-        {plans.map((plan) => (
-          <div
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+        {plans.map((plan, i) => (
+          <motion.div
             key={plan.id}
-            className={`relative bg-white rounded-2xl shadow-sm p-8 border flex flex-col hover:shadow-lg ${plan.current
-              ? 'border-indigo-600 ring-2 ring-indigo-600'
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className={`tech-card relative p-8 flex flex-col group ${plan.current
+              ? 'border-primary ring-1 ring-primary/50 bg-primary/5'
               : (plan as any).popular
-                ? 'border-indigo-300'
-                : 'border-slate-200'
+                ? 'border-secondary/40'
+                : ''
               }`}
           >
             {(plan as any).popular && !plan.current && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow">
-                MOST POPULAR
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-secondary text-secondary-foreground text-[10px] font-black tracking-widest px-6 py-1.5 rounded-full shadow-lg shadow-secondary/20 uppercase">
+                Optimized Tier
               </div>
             )}
             {plan.current && (
-              <div className="absolute top-0 right-0 -mt-3 -mr-3 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-                CURRENT
+              <div className="absolute top-0 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black rounded-b-lg uppercase tracking-widest shadow-[0_0_10px_theme(colors.emerald.500/20)]">
+                Linked
               </div>
             )}
 
-            <h2 className="text-xl font-bold text-slate-900 mb-1">{plan.name}</h2>
-            <div className="flex items-baseline mb-6">
-              <span className="text-4xl font-bold text-slate-900">{plan.price}</span>
-              {plan.period && <span className="text-slate-500 ml-2 text-sm">{plan.period}</span>}
+            <div className="mb-8">
+              <h2 className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4 opacity-70">Node: {plan.name}</h2>
+              <div className="flex items-baseline">
+                <span className="text-5xl font-black text-foreground tracking-tighter">{plan.price}</span>
+                {plan.period && <span className="text-muted-foreground ml-2 text-xs font-bold uppercase tracking-widest">{plan.period}</span>}
+              </div>
             </div>
 
-            <ul className="mb-8 space-y-3 flex-grow">
+            <ul className="mb-10 space-y-4 flex-grow">
               <li className="flex items-center gap-3">
-                <svg className="h-5 w-5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-slate-700 font-medium text-sm">{plan.credits}</span>
+                <div className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-sm" />
+                </div>
+                <span className="text-foreground font-bold text-xs uppercase tracking-tight">{plan.credits}</span>
               </li>
               {plan.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-3">
-                  <svg className="h-5 w-5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-slate-600 text-sm">{feature}</span>
+                  <div className="w-5 h-5 rounded bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                    <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-sm" />
+                  </div>
+                  <span className="text-muted-foreground text-xs font-medium">{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-auto">
+            <div className="mt-auto relative z-20">
               {plan.current ? (
-                <button disabled className="w-full py-3 px-4 border border-slate-200 rounded-xl text-slate-400 font-medium bg-slate-50 cursor-not-allowed text-sm">
-                  Current Plan
-                </button>
+                <div className="w-full py-4 text-center text-emerald-500 text-xs font-black uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                  Node Active
+                </div>
               ) : plan.id === 'free' ? (
-                <button disabled className="w-full py-3 px-4 border border-slate-200 rounded-xl text-slate-400 font-medium bg-slate-50 cursor-not-allowed text-sm">
-                  Default Plan
-                </button>
+                <div className="w-full py-4 text-center text-muted-foreground text-xs font-black uppercase tracking-widest bg-white/5 border border-white/10 rounded-xl">
+                  Default Tier
+                </div>
               ) : !user ? (
                 <Link
                   to="/login"
-                  className="block w-full text-center py-3 px-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all duration-200 text-sm"
+                  className="btn-primary-tech w-full uppercase tracking-widest text-xs"
                 >
-                  Login to Purchase
+                  Access Required
                 </Link>
               ) : showButtons && (plan as any).ncpId ? (
-                <PayPalHostedButton hostedButtonId={(plan as any).ncpId} />
+                <div className="relative group/btn">
+                  <PayPalHostedButton hostedButtonId={(plan as any).ncpId} />
+                  {/* Styling the container to look better but PayPal will inject its own button */}
+                </div>
               ) : (
-                <div className="h-12 bg-slate-100 rounded-xl animate-pulse mt-4" />
+                <div className="h-14 bg-white/5 rounded-xl animate-pulse mt-4 flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
               )}
             </div>
-          </div>
+
+            {/* HUD Corner Accents */}
+            <div className="absolute top-0 right-0 w-8 h-8 pointer-events-none opacity-20 border-t-2 border-r-2 border-primary/50 rounded-tr-xl" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 pointer-events-none opacity-20 border-b-2 border-l-2 border-primary/50 rounded-bl-xl" />
+          </motion.div>
         ))}
       </div>
 
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="inline-flex items-center text-slate-400 text-xs bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
-          <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+      <div className="max-w-xl mx-auto text-center">
+        <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full glass-panel border border-white/10 group cursor-default">
+          <svg className="w-4 h-4 text-primary group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
           </svg>
-          SSL Secured Payment • Powered by PayPal
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Encrypted Node Transition via PayPal</span>
         </div>
-        <p className="mt-3 text-xs text-slate-400">
-          Credits added automatically after payment. All sales are final.
-        </p>
       </div>
     </div>
   );
