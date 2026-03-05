@@ -14,7 +14,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   // Define routes that should show the sidebar (dashboard-like routes)
-  const isDashboardRoute = ['/dashboard', '/generate', '/history', '/pricing', '/admin'].some(path =>
+  const isDashboardRoute = ['/dashboard', '/generate', '/history', '/admin'].some(path =>
     location.pathname.startsWith(path)
   );
 

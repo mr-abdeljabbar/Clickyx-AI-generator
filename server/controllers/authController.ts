@@ -30,12 +30,12 @@ export const register = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({ message: 'User created successfully. You have 3 free credits!' });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ errors: error.issues });
     }
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error('Registration Error:', error);
+    res.status(500).json({ message: 'Internal server error', details: error.message || error.toString() });
   }
 };
 

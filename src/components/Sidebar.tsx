@@ -19,7 +19,7 @@ export default function Sidebar() {
   const filteredLinks = navLinks.filter(link => !link.protected || user);
 
   return (
-    <div className="hidden md:flex flex-col w-64 glass-panel border-r border-white/5 min-h-screen fixed left-0 top-0 pt-20 z-40 transition-all duration-500">
+    <div className="max-md:hidden flex flex-col w-64 glass-panel border-r border-white/5 min-h-screen fixed left-0 top-0 pt-20 z-40 transition-all duration-500">
       <div className="px-6 py-2">
         <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase opacity-50">Navigation System</span>
       </div>
@@ -32,8 +32,8 @@ export default function Sidebar() {
               key={link.path}
               to={link.path}
               className={`relative flex items-center px-4 py-3 text-sm font-bold rounded-xl transition-all group ${active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
                 }`}
             >
               {active && (

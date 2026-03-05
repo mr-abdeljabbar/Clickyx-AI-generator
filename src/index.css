@@ -3,32 +3,32 @@
 @theme {
   --color-background: hsl(230 25% 5%);
   --color-foreground: hsl(210 40% 98%);
-  
+
   --color-card: hsl(230 25% 7%);
   --color-card-foreground: hsl(210 40% 98%);
-  
+
   --color-popover: hsl(230 25% 7%);
   --color-popover-foreground: hsl(210 40% 98%);
-  
+
   --color-primary: hsl(190 90% 50%);
   --color-primary-foreground: hsl(230 25% 5%);
-  
+
   --color-secondary: hsl(280 80% 60%);
   --color-secondary-foreground: hsl(210 40% 98%);
-  
+
   --color-muted: hsl(230 25% 15%);
   --color-muted-foreground: hsl(215 20% 65%);
-  
+
   --color-accent: hsl(190 90% 50%);
   --color-accent-foreground: hsl(210 40% 98%);
-  
+
   --color-destructive: hsl(0 84% 60%);
   --color-destructive-foreground: hsl(210 40% 98%);
-  
+
   --color-border: hsl(230 25% 15%);
   --color-input: hsl(230 25% 15%);
   --color-ring: hsl(190 90% 50%);
-  
+
   --radius-lg: 1rem;
   --radius-md: calc(1rem - 2px);
   --radius-sm: calc(1rem - 4px);
@@ -38,10 +38,10 @@
   :root {
     color-scheme: dark;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary;
-    background-image: 
+    background-image:
       radial-gradient(circle at 50% -20%, hsl(190 90% 20% / 0.15), transparent),
       radial-gradient(circle at 0% 100%, hsl(280 80% 20% / 0.1), transparent);
     min-height: 100vh;
@@ -52,13 +52,13 @@
   .glass-panel {
     @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
   }
-  
+
   .tech-card {
-    @apply glass-panel transition-all duration-300 hover:border-primary/30 hover:shadow-primary/5 hover:-translate-y-1;
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl transition-all duration-300 hover:border-primary/30 hover:shadow-primary/5 hover:-translate-y-1;
     position: relative;
     overflow: hidden;
   }
-  
+
   .tech-card::before {
     content: '';
     position: absolute;
@@ -70,43 +70,80 @@
     transform: translateX(-100%);
     transition: transform 0.5s;
   }
-  
+
   .tech-card:hover::before {
     transform: translateX(100%);
   }
-  
+
   .neon-glow {
     text-shadow: 0 0 10px hsl(190 90% 50% / 0.5), 0 0 20px hsl(190 90% 50% / 0.3);
   }
-  
+
   .btn-primary-tech {
-    @apply relative overflow-hidden bg-primary text-primary-foreground font-bold px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:scale-105 hover:brightness-110 active:scale-95 shadow-[0_0_20px_rgba(34,211,238,0.3)];
+    @apply relative overflow-hidden bg-primary text-primary-foreground font-bold px-6 py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:scale-105 hover:brightness-110 active:scale-95 shadow-lg shadow-primary/30;
   }
-  
+
   .hud-border {
     @apply border border-primary/20 relative;
-    clip-path: polygon(
-      0 10px, 10px 0, 
-      calc(100% - 10px) 0, 100% 10px, 
-      100% calc(100% - 10px), calc(100% - 10px) 100%, 
-      10px 100%, 0 calc(100% - 10px)
-    );
+    clip-path: polygon(0 10px, 10px 0,
+        calc(100% - 10px) 0, 100% 10px,
+        100% calc(100% - 10px), calc(100% - 10px) 100%,
+        10px 100%, 0 calc(100% - 10px));
   }
 }
 
 .ani-grid {
   background-size: 50px 50px;
-  background-image: 
+  background-image:
     linear-gradient(to right, hsl(190 90% 50% / 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, hsl(190 90% 50% / 0.05) 1px, transparent 1px);
   mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animated-border {
+  position: relative;
+  background: var(--color-card);
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+}
+
+.animated-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -1px;
+  /* same as border width */
+  border-radius: inherit;
+  background: conic-gradient(from 0deg,
+      transparent 0%,
+      transparent 70%,
+      var(--color-primary) 100%);
+  animation: spin-slow 4s linear infinite;
 }

@@ -11,7 +11,7 @@ export default function Header() {
   const isActive = (path: string) => location.pathname === path;
 
   // Check if we are in a dashboard route where sidebar is visible
-  const isDashboardRoute = ['/dashboard', '/generate', '/history', '/pricing', '/admin'].some(path =>
+  const isDashboardRoute = ['/dashboard', '/generate', '/history', '/admin'].some(path =>
     location.pathname.startsWith(path)
   );
 
@@ -42,7 +42,7 @@ export default function Header() {
             </Link>
 
             {!showSidebar && (
-              <nav className="hidden md:ml-10 md:flex md:space-x-1">
+              <nav className="max-md:hidden md:ml-10 flex md:space-x-1">
                 {filteredLinks.map((link) => {
                   const active = isActive(link.path);
                   return (
@@ -65,7 +65,7 @@ export default function Header() {
             )}
           </div>
 
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="max-md:hidden flex items-center space-x-6">
             {user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex flex-col items-end mr-2">
