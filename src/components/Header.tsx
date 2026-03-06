@@ -20,11 +20,12 @@ export default function Header() {
   const isAdmin = user?.role === 'ADMIN';
 
   const navLinks = [
-    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing' }]),
+    { name: 'Contact', path: '/contact' },
     { name: 'Dashboard', path: isAdmin ? '/admin' : '/dashboard', protected: true },
     { name: 'Generate', path: '/generate', protected: true },
     { name: 'History', path: '/history', protected: true },
-    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing' }]),
   ];
 
   const filteredLinks = navLinks.filter(link => !link.protected || user);

@@ -11,7 +11,6 @@ export default function Sidebar() {
   const isAdmin = user?.role === 'ADMIN';
 
   const navLinks = [
-    { name: 'Home', path: '/', icon: Home, protected: false },
     { name: 'Dashboard', path: isAdmin ? '/admin' : '/dashboard', icon: LayoutDashboard, protected: true },
     { name: 'Generate', path: '/generate', icon: Image, protected: true },
     { name: 'History', path: '/history', icon: History, protected: true },
