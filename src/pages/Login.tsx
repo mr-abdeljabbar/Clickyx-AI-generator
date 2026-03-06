@@ -13,7 +13,15 @@ const Login = () => {
     e.preventDefault();
     try {
       await login({ email, password });
-      navigate('/dashboard');
+
+      // We need to fetch the updated state directly since the hook won't trigger re-render in the middle of this async function
+      const { user } = useAuthStore.getState();
+
+      if (user?.role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     }

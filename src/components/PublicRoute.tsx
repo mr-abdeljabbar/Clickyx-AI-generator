@@ -12,8 +12,12 @@ const PublicRoute = () => {
         );
     }
 
-    // If authenticated, redirect to dashboard
+    // If authenticated, redirect based on role
     if (isAuthenticated) {
+        const { user } = useAuthStore.getState();
+        if (user?.role === 'ADMIN') {
+            return <Navigate to="/admin" replace />;
+        }
         return <Navigate to="/dashboard" replace />;
     }
 

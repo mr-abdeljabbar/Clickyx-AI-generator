@@ -29,16 +29,15 @@ export default function Layout({ children }: LayoutProps) {
       <Header />
       <div className="flex flex-1 relative z-10 w-full">
         {showSidebar && <Sidebar />}
-        <main
-          className={`flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-all duration-500 ease-in-out ${showSidebar ? 'md:pl-72' : ''
-            }`}
-        >
-          <div className="relative">
-            {children}
-          </div>
-        </main>
+        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out w-full ${showSidebar ? 'md:ml-64' : ''}`}>
+          <main className="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="relative">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
-      <div className={showSidebar ? 'md:pl-64' : ''}>
+      <div className={showSidebar ? 'md:ml-64' : ''}>
         <Footer />
       </div>
     </div>

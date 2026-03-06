@@ -16,6 +16,27 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  try {
+    // Check if user exists and prevent self-deletion
+    if (req.user?.userId === id) {
+      return res.status(400).json({ message: 'Administrators cannot delete their own account.' });
+    }
+
+    await prisma.user.delete({
+      where: { id },
+    });
+
+    // Prisma cascading will wipe related tables
+    res.json({ message: 'Entity successfully purged from system' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ message: 'Failed to purge entity' });
+  }
+};
+
+
 export const adjustCredits = async (req: AuthRequest, res: Response) => {
   const { userId, amount } = req.body;
   try {
