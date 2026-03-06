@@ -17,12 +17,14 @@ export default function Header() {
 
   const showSidebar = user && isDashboardRoute;
 
+  const isAdmin = user?.role === 'ADMIN';
+
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: '/dashboard', protected: true },
+    { name: 'Dashboard', path: isAdmin ? '/admin' : '/dashboard', protected: true },
     { name: 'Generate', path: '/generate', protected: true },
     { name: 'History', path: '/history', protected: true },
-    { name: 'Pricing', path: '/pricing' },
+    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing' }]),
   ];
 
   const filteredLinks = navLinks.filter(link => !link.protected || user);

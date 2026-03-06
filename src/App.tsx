@@ -35,6 +35,9 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/generate" element={<Generator />} />
             <Route path="/history" element={<History />} />
+          </Route>
+
+          <Route element={<ProtectedRoute forbidAdmin={true} />}>
             <Route path="/pricing" element={<Pricing />} />
           </Route>
 

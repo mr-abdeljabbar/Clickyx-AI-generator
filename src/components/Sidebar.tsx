@@ -8,12 +8,14 @@ export default function Sidebar() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const isAdmin = user?.role === 'ADMIN';
+
   const navLinks = [
     { name: 'Home', path: '/', icon: Home, protected: false },
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, protected: true },
+    { name: 'Dashboard', path: isAdmin ? '/admin' : '/dashboard', icon: LayoutDashboard, protected: true },
     { name: 'Generate', path: '/generate', icon: Image, protected: true },
     { name: 'History', path: '/history', icon: History, protected: true },
-    { name: 'Pricing', path: '/pricing', icon: CreditCard, protected: false },
+    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing', icon: CreditCard, protected: false }]),
   ];
 
   const filteredLinks = navLinks.filter(link => !link.protected || user);

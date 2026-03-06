@@ -3,9 +3,10 @@ import { useAuthStore } from '../store/authStore';
 
 interface ProtectedRouteProps {
   requireAdmin?: boolean;
+  forbidAdmin?: boolean;
 }
 
-const ProtectedRoute = ({ requireAdmin }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ requireAdmin, forbidAdmin }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, user } = useAuthStore();
 
   if (isLoading) {
@@ -22,6 +23,10 @@ const ProtectedRoute = ({ requireAdmin }: ProtectedRouteProps) => {
 
   if (requireAdmin && user?.role !== 'ADMIN') {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  if (forbidAdmin && user?.role === 'ADMIN') {
+    return <Navigate to="/admin" replace />;
   }
 
   return <Outlet />;
