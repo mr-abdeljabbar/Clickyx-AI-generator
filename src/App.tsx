@@ -17,6 +17,7 @@ import PublicRoute from './components/PublicRoute';
 import Layout from './components/Layout';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   const { checkAuth } = useAuthStore();
@@ -27,6 +28,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Layout>
         <Routes>
           <Route path="/" element={<Landing />} />

@@ -20,12 +20,11 @@ export default function Header() {
   const isAdmin = user?.role === 'ADMIN';
 
   const navLinks = [
-    { name: 'About', path: '/about' },
-    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing' }]),
-    { name: 'Contact', path: '/contact' },
     { name: 'Dashboard', path: isAdmin ? '/admin' : '/dashboard', protected: true },
     { name: 'Generate', path: '/generate', protected: true },
-    { name: 'History', path: '/history', protected: true },
+    ...(isAdmin ? [] : [{ name: 'About US', path: '/about' }]),
+    ...(isAdmin ? [] : [{ name: 'Pricing', path: '/pricing' }]),
+    ...(isAdmin ? [] : [{ name: 'Contact US', path: '/contact' }]),
   ];
 
   const filteredLinks = navLinks.filter(link => !link.protected || user);
@@ -44,27 +43,30 @@ export default function Header() {
               </span>
             </Link>
 
+            {/* Navigation links - Centered */}
             {!showSidebar && (
-              <nav className="max-md:hidden md:ml-10 flex md:space-x-1">
-                {filteredLinks.map((link) => {
-                  const active = isActive(link.path);
-                  return (
-                    <Link
-                      key={link.path}
-                      to={link.path}
-                      className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg group ${active
-                        ? 'text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                        }`}
-                    >
-                      {link.name}
-                      {active && (
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_vars(--color-primary)]" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block">
+                <nav className="flex space-x-1 border border-white/5 bg-black/20 backdrop-blur-md px-2 py-1.5 rounded-2xl shadow-xl">
+                  {filteredLinks.map((link) => {
+                    const active = isActive(link.path);
+                    return (
+                      <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`relative px-3 py-1.5 text-xs font-semibold transition-all duration-300 rounded-xl group ${active
+                          ? 'text-primary bg-primary/10'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                          }`}
+                      >
+                        {link.name}
+                        {active && (
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-px bg-gradient-to-r from-transparent via-primary to-transparent shadow-[0_0_8px_vars(--color-primary)]" />
+                        )}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
             )}
           </div>
 

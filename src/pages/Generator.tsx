@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { downloadImage } from '../utils/downloadImage';
+import { Download } from 'lucide-react';
 
 const Generator = () => {
   const [prompt, setPrompt] = useState('');
@@ -98,15 +100,13 @@ const Generator = () => {
               <div className="absolute inset-0 bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center p-6 text-center">
                 <div className="hud-border p-8 flex flex-col items-center gap-6">
                   <p className="text-xs font-medium text-foreground max-w-xs line-clamp-3 mb-2">{prompt}</p>
-                  <a
-                    href={image}
-                    download="neural-synthesis.png"
-                    className="btn-primary-tech px-8 text-xs uppercase tracking-widest"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => downloadImage(image, `synthesis-${Date.now()}.png`)}
+                    className="btn-primary-tech px-8 text-xs uppercase tracking-widest flex items-center gap-2"
                   >
+                    <Download className="w-4 h-4" />
                     Archive Asset
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

@@ -8,6 +8,8 @@ const Admin = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [userToDelete, setUserToDelete] = useState<{ id: string; email: string } | null>(null);
+
   const fetchAdminData = async () => {
     try {
       const [usersRes, statsRes] = await Promise.all([
@@ -45,14 +47,19 @@ const Admin = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string, email: string) => {
-    if (window.confirm(`Initiate Terminal Purge for Entity ${email}? This action is irreversible and will cascade delete all associated data.`)) {
-      try {
-        await api.delete(`/admin/users/${userId}`);
-        fetchAdminData();
-      } catch (error: any) {
-        alert(error.response?.data?.message || 'Failed to purge entity');
-      }
+  const handleDeleteUser = (userId: string, email: string) => {
+    setUserToDelete({ id: userId, email });
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    try {
+      await api.delete(`/admin/users/${userToDelete.id}`);
+      setUserToDelete(null);
+      fetchAdminData();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Failed to purge entity');
+      setUserToDelete(null);
     }
   };
 
@@ -218,6 +225,62 @@ const Admin = () => {
           </table>
         </div>
       </motion.div>
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="w-full max-w-md bg-black border border-red-500/30 rounded-2xl shadow-2xl overflow-hidden shadow-[0_0_50px_rgba(239,68,68,0.15)]"
+          >
+            {/* Modal Header */}
+            <div className="bg-red-500/10 border-b border-red-500/20 p-6 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4 border border-red-500/50 shadow-[0_0_20px_theme(colors.red.500/30)] relative">
+                <Trash2 className="w-8 h-8 text-red-500 animate-pulse" />
+              </div>
+              <h3 className="text-xl font-black text-white uppercase tracking-wider">Initialize Purge</h3>
+              <p className="text-xs font-mono text-red-400 mt-2 uppercase tracking-widest">Critical action requires confirmation</p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              <div className="p-4 bg-white/5 border border-white/10 rounded-xl relative overflow-hidden group">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+                <p className="text-sm text-muted-foreground text-center">
+                  You are about to irreversibly terminate the entity associated with:
+                </p>
+                <p className="text-center font-bold text-white mt-2 font-mono text-lg truncate">
+                  {userToDelete.email}
+                </p>
+              </div>
+
+              <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex gap-3">
+                <ShieldAlert className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-400 font-medium leading-relaxed">
+                  <strong className="text-red-500">Warning:</strong> This process will cascade and destroy all assets, history, and generated parameters linked to this entity. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-white/5 border-t border-white/10 flex gap-3">
+              <button
+                onClick={() => setUserToDelete(null)}
+                className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl border border-white/10 transition-colors"
+              >
+                Abort
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-xl uppercase tracking-wider transition-all shadow-[0_0_20px_theme(colors.red.500/30)] hover:shadow-[0_0_30px_theme(colors.red.500/50)] border border-red-400/50"
+              >
+                Confirm Purge
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
     </div>
   );

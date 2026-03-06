@@ -1,11 +1,19 @@
 import { motion } from 'motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Mail, Send, CheckCircle2 } from 'lucide-react';
 import React, { useState } from 'react';
+import { useAuthStore } from '../store/authStore';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const { user } = useAuthStore();
+  const location = useLocation();
+  const isAdmin = user?.role === 'ADMIN';
+
+  const isDashboardRoute = ['/dashboard', '/generate', '/history', '/admin'].some(path =>
+    location.pathname.startsWith(path)
+  );
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +41,28 @@ export default function Footer() {
     }
   };
 
+  if (isDashboardRoute) {
+    return (
+      <footer className="mt-auto py-4 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-black/40 backdrop-blur-xl shrink-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl mx-auto">
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center md:text-left">
+            &copy; {new Date().getFullYear()} Clickyx_Archive. {isAdmin && <span className="text-primary">Admin Privileges Active. </span>}All Systems Nominal.
+          </p>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center md:text-right">
+            Developed by <a href="https://abdeljabar.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white transition-colors">Abdeljabar.com</a>
+          </p>
+        </div>
+      </footer>
+    );
+  }
+
   return (
-    <footer className="mt-auto pt-16 pb-8 px-4 sm:px-6 lg:px-8 border-t border-white/5 relative overflow-hidden bg-black/40 backdrop-blur-xl">
+    <footer className="mt-auto pt-10 pb-6 px-4 sm:px-6 lg:px-8 border-t border-white/5 relative overflow-hidden bg-black/40 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
 
           {/* Brand & Socials */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex flex-col">
               <span className="text-2xl font-black text-foreground uppercase tracking-tighter neon-glow-text">
                 Clickyx <span className="text-primary">AI</span>
@@ -72,7 +95,7 @@ export default function Footer() {
           </div>
 
           {/* Platform Links */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Platform Engine</h3>
             <ul className="space-y-3">
               {[
@@ -94,7 +117,7 @@ export default function Footer() {
           </div>
 
           {/* Legal / Info Links */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Information Directory</h3>
             <ul className="space-y-3">
               {[
@@ -118,7 +141,7 @@ export default function Footer() {
           </div>
 
           {/* Newsletter Form */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <h3 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               Network Updates
@@ -170,10 +193,16 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
-            &copy; {new Date().getFullYear()} Clickyx_Archive. All Systems Nominal.
-          </p>
+        <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              &copy; {new Date().getFullYear()} Clickyx_Archive. All Systems Nominal.
+            </p>
+            <div className="hidden md:block w-px h-3 bg-white/20" />
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+              Developed by <a href="https://abdeljabar.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-white transition-colors">Abdeljabar.com</a>
+            </p>
+          </div>
           <div className="flex gap-1">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="w-1.5 h-1.5 bg-primary/20 rounded-full" />
