@@ -4,6 +4,9 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
+# Install openssl for Prisma compatibility with Alpine Linux
+RUN apk add --no-cache openssl
+
 # Copy package.json and package-lock.json first to leverage Docker cache
 COPY package*.json ./
 
