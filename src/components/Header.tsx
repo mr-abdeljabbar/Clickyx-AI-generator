@@ -103,10 +103,11 @@ export default function Header() {
             )}
           </div>
 
-          <div className="-mr-2 flex items-center md:hidden">
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
+              className="flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/5 transition-colors border border-white/20 hover:border-white/40"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -120,14 +121,14 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden glass-panel border-t border-white/5 absolute w-full left-0 animate-in slide-in-from-top duration-300">
+        <div className="md:hidden bg-black/95 backdrop-blur-2xl border-t border-white/10 absolute w-full left-0 animate-in slide-in-from-top duration-300 z-[100] shadow-2xl">
           <div className="p-4 space-y-2">
             {filteredLinks.map((link) => (
               <Link
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-xl font-bold transition-all ${isActive(link.path)
+                className={`flex items-center justify-center px-4 py-3 rounded-xl font-bold transition-all ${isActive(link.path)
                   ? 'bg-primary/10 text-primary border border-primary/20'
                   : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
                   }`}
@@ -139,7 +140,7 @@ export default function Header() {
             <div className="pt-4 mt-4 border-t border-white/5">
               {user ? (
                 <div className="space-y-4">
-                  <div className="px-4">
+                  <div className="px-4 text-center">
                     <p className="text-xs text-muted-foreground font-mono mb-1">{user.email}</p>
                     <p className="text-sm font-bold text-primary">Member Status: Active</p>
                   </div>

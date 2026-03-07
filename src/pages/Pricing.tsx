@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -43,13 +43,21 @@ const PayPalHostedButton = ({ hostedButtonId }: PayPalHostedButtonProps) => {
   }, [hostedButtonId, containerId, attempted]);
 
   return (
-    <div className="mt-6">
+    <div className="mt-4 w-full relative">
       {error && (
-        <div className="text-xs text-red-400 mb-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-center">
-          Connection Error: {error}
+        <div className="text-xs text-red-400 mb-4 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 text-center w-full font-mono">
+          [CRITICAL_FAILURE] - {error}
         </div>
       )}
-      <div id={containerId} className="min-h-[45px] transition-all duration-300 hover:scale-[1.02]" />
+      <div id={containerId} className="min-h-[45px] w-full transition-all duration-300 hover:scale-[1.01] relative z-10" />
+
+      {/* HUD Decorative Elements inside the PayPal box */}
+      {!error && (
+        <div className="absolute inset-0 border border-white/5 pointer-events-none rounded-lg overflow-hidden">
+          <div className="absolute top-0 right-0 w-8 h-px bg-primary/20" />
+          <div className="absolute bottom-0 left-0 w-8 h-px bg-primary/20" />
+        </div>
+      )}
     </div>
   );
 };
@@ -57,6 +65,7 @@ const PayPalHostedButton = ({ hostedButtonId }: PayPalHostedButtonProps) => {
 const Pricing = () => {
   const { user } = useAuthStore();
   const [showButtons, setShowButtons] = useState(false);
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
 
   const proId = import.meta.env.VITE_PAYPAL_NCP_PRO_ID || 'FJ3DL4RKJPNZQ';
   const lifetimeId = import.meta.env.VITE_PAYPAL_NCP_LIFETIME_ID || '236SD6UT8ECSG';
@@ -113,9 +122,9 @@ const Pricing = () => {
   return (
     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 overflow-hidden">
 
-      {/* Background Glow Effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/10 blur-[100px] rounded-full pointer-events-none" />
+      {/* Background Glow Effects (Subtle/Reduced visibility) */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/14 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/7 blur-[100px] rounded-full pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -123,7 +132,7 @@ const Pricing = () => {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="text-center mb-20 relative z-10"
       >
-        <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black tracking-widest uppercase mb-6 shadow-[0_0_20px_theme(colors.primary/20)]">
+        <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black tracking-widest uppercase mb-6 shadow-[0_0_20px_theme(colors.primary/14)]">
           Neural Access Tiers
         </span>
         <h1 className="text-5xl lg:text-7xl font-black text-foreground uppercase tracking-tighter mb-6 leading-tight">
@@ -134,18 +143,18 @@ const Pricing = () => {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 max-w-7xl mx-auto mb-24 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 max-w-7xl mx-auto mb-24 relative z-10 items-stretch">
         {plans.map((plan, i) => (
           <motion.div
             key={plan.id}
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
-            className="flex"
+            className="flex h-full w-full"
           >
             <div
               className={`flex flex-col w-full h-full min-h-[650px] rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
-                ${plan.popular ? 'animated-border shadow-[0_0_30px_theme(colors.primary/15)] hover:shadow-[0_0_50px_theme(colors.primary/30)]' : 'bg-card/40 backdrop-blur-xl border border-white/10 hover:border-white/20'}
+                ${plan.popular ? 'animated-border shadow-[0_0_30px_theme(colors.primary/14)] hover:shadow-[0_0_50px_theme(colors.primary/20)]' : 'bg-card/40 backdrop-blur-xl border border-white/10 hover:border-white/20'}
                 ${plan.current ? 'ring-2 ring-emerald-500/50 bg-emerald-500/5' : ''}
               `}
             >
@@ -195,7 +204,7 @@ const Pricing = () => {
               </ul>
 
               {/* CTA Section */}
-              <div className="mt-auto relative z-20">
+              <div className="mt-auto relative z-20 w-full pt-4">
                 {plan.current ? (
                   <div className="w-full py-4 text-center text-emerald-500 text-sm font-black uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                     Currently Active
@@ -213,21 +222,77 @@ const Pricing = () => {
                     Authenticate to Upgrade
                   </Link>
                 ) : showButtons && plan.ncpId ? (
-                  <div className="relative group/btn w-full mt-2">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-primary/20 to-emerald-500/20 rounded-xl blur opacity-75 group-hover/btn:opacity-100 transition duration-500 group-hover/btn:duration-200" />
-                    <div className="relative bg-[#0a0a0a] border border-white/10 hover:border-emerald-500/40 rounded-xl p-3 shadow-2xl transition-colors">
-                      <div className="flex items-center gap-2 mb-1 w-full justify-center border-b border-white/5 pb-2">
-                        <Shield className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                        <span className="text-[10px] font-black text-emerald-400/80 uppercase tracking-widest whitespace-nowrap">Secure Gateway</span>
-                      </div>
-                      <div className="-mt-2 w-full relative z-10 flex justify-center">
-                        <PayPalHostedButton hostedButtonId={plan.ncpId} />
-                      </div>
+                  <div className="relative group/btn w-full mt-2 block overflow-hidden">
+                    {/* Outer HUD Brackets */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-primary/40 z-30" />
+                    <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-primary/40 z-30" />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-primary/40 z-30" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-primary/40 z-30" />
+
+                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/10 via-primary/20 to-emerald-500/10 rounded-xl blur opacity-40 group-hover/btn:opacity-100 transition duration-1000 group-hover/btn:duration-300" />
+
+                    <div className="relative bg-black/80 border border-white/10 hover:border-primary/40 rounded-xl p-0 shadow-2xl transition-all duration-500 overflow-hidden">
+                      {activePlanId !== plan.id ? (
+                        <button
+                          onClick={() => setActivePlanId(plan.id)}
+                          className="w-full py-5 px-4 flex flex-col items-center justify-center gap-2 group/click transition-all hover:bg-white/5"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Zap className="w-4 h-4 text-primary animate-pulse" />
+                            <span className="text-xs font-black text-white uppercase tracking-[0.3em]">Initiate Protocol</span>
+                            <Zap className="w-4 h-4 text-primary animate-pulse" />
+                          </div>
+                          <span className="text-[7px] font-mono text-primary/40 uppercase tracking-widest">[CLICK_TO_ESTABLISH_UPLINK]</span>
+                        </button>
+                      ) : (
+                        <div className="p-4 relative">
+                          {/* Scanning Line Animation */}
+                          <motion.div
+                            initial={{ top: "-10%" }}
+                            animate={{ top: "110%" }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent z-10 pointer-events-none"
+                          />
+
+                          <div className="flex items-center justify-between mb-3 w-full border-b border-white/5 pb-2 relative z-20">
+                            <div className="flex items-center gap-2">
+                              <Shield className="w-3.5 h-3.5 text-primary flex-shrink-0 animate-pulse" />
+                              <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] whitespace-nowrap">
+                                Neural Secure Link
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[8px] font-mono text-emerald-500 animate-pulse">[ESTABLISHED]</span>
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_theme(colors.emerald.500)]" />
+                            </div>
+                          </div>
+
+                          <div className="w-full relative z-20 flex flex-col items-center">
+                            <div className="w-full flex justify-between items-center mb-4 px-1">
+                              <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest">Protocol: PP_HOSTED</span>
+                              <span className="text-[8px] font-mono text-muted-foreground uppercase">Ver: 0x92f</span>
+                            </div>
+
+                            <PayPalHostedButton hostedButtonId={plan.ncpId} />
+
+                            <button
+                              onClick={() => setActivePlanId(null)}
+                              className="mt-3 flex items-center gap-2 opacity-30 hover:opacity-100 transition-opacity duration-500 cursor-pointer"
+                            >
+                              <div className="h-0.5 w-6 bg-primary/40" />
+                              <span className="text-[7px] font-mono text-primary uppercase tracking-[0.3em] hover:text-red-400">Abort Session</span>
+                              <div className="h-0.5 w-6 bg-primary/40" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className="h-[45px] mt-6 bg-white/5 rounded-lg animate-pulse flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <div className="h-[60px] mt-6 bg-white/5 rounded-xl border border-white/5 animate-pulse flex flex-col items-center justify-center w-full gap-2 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent animate-shimmer" />
+                    <div className="w-5 h-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin relative z-10" />
+                    <span className="text-[8px] font-mono text-primary/40 uppercase tracking-widest animate-pulse relative z-10">Initializing Data Link...</span>
                   </div>
                 )}
               </div>
