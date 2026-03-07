@@ -20,7 +20,11 @@ const Generator = () => {
     try {
       const response = await api.post('/generate', { prompt });
       setImage(response.data.imageUrl);
-      checkAuth(); // Update credits
+      
+      // Directly update the user store with the deduct credits from the response
+      if (response.data.user) {
+        useAuthStore.getState().setUser(response.data.user);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Generation failed');
     } finally {

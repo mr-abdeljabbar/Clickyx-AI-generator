@@ -55,7 +55,7 @@ export const generate = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    res.json({ imageUrl, remainingCredits: result.credits - 1 });
+    res.json({ imageUrl, remainingCredits: result.credits, user: result });
 
   } catch (error: any) {
     console.error(error);

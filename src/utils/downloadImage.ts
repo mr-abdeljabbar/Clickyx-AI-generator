@@ -1,24 +1,21 @@
 export const downloadImage = async (url: string, filename: string = 'neural-synthesis.png') => {
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
+        // We use our backend proxy to bypass CORS restrictions from R2 storage
+        const encodedUrl = encodeURIComponent(url);
+        const proxyUrl = `/api/generate/download?url=${encodedUrl}`;
 
-        const blob = await response.blob();
-        const objectUrl = window.URL.createObjectURL(blob);
-
-        // Create an invisible anchor to trigger the download
+        // Creating an invisible anchor to trigger the download directly from the API endpoint
         const link = document.createElement('a');
-        link.href = objectUrl;
+        link.href = proxyUrl;
         link.download = filename;
         document.body.appendChild(link);
         link.click();
 
         // Clean up
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(objectUrl);
     } catch (error) {
         console.error('Failed to download image:', error);
-        // Fallback: try to open in a new tab if blob fetch fails (e.g., hard CORS)
+        // Fallback: try to open in a new tab
         window.open(url, '_blank');
     }
 };

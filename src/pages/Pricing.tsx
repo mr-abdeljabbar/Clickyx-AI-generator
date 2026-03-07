@@ -144,7 +144,7 @@ const Pricing = () => {
             className="flex"
           >
             <div
-              className={`flex flex-col w-full rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
+              className={`flex flex-col w-full h-full min-h-[650px] rounded-2xl p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl
                 ${plan.popular ? 'animated-border shadow-[0_0_30px_theme(colors.primary/15)] hover:shadow-[0_0_50px_theme(colors.primary/30)]' : 'bg-card/40 backdrop-blur-xl border border-white/10 hover:border-white/20'}
                 ${plan.current ? 'ring-2 ring-emerald-500/50 bg-emerald-500/5' : ''}
               `}
