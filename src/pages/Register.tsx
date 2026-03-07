@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
+import GoogleButton from '../components/GoogleButton';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -88,6 +89,14 @@ const Register = () => {
           >
             Finalize Registry
           </button>
+
+          <div className="relative my-6 flex items-center">
+            <div className="flex-grow border-t border-white/10"></div>
+            <span className="flex-shrink-0 mx-4 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Or Connect Via</span>
+            <div className="flex-grow border-t border-white/10"></div>
+          </div>
+
+          <GoogleButton mode="signup" onError={setError} />
         </form>
 
         <div className="mt-10 pt-8 border-t border-white/5 flex flex-col items-center gap-4">

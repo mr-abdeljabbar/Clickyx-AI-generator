@@ -4,6 +4,8 @@ import api from '../services/api';
 interface User {
   id: string;
   email: string;
+  name?: string;
+  avatar?: string;
   role: 'USER' | 'ADMIN';
   credits: number;
   plan: 'FREE' | 'PRO' | 'LIFETIME';
@@ -15,6 +17,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: any) => Promise<void>;
+  googleLogin: (token: string) => Promise<void>;
   register: (credentials: any) => Promise<any>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -31,6 +34,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccessToken: (token) => set({ accessToken: token }),
   login: async (credentials) => {
     const response = await api.post('/auth/login', credentials);
+    localStorage.setItem('hasSession', 'true');
+    set({
+      user: response.data.user,
+      accessToken: response.data.accessToken,
+      isAuthenticated: true
+    });
+  },
+  googleLogin: async (data: string | { credential?: string; accessToken?: string }) => {
+    const payload = typeof data === 'string' ? { credential: data } : data;
+    const response = await api.post('/auth/google', payload);
     localStorage.setItem('hasSession', 'true');
     set({
       user: response.data.user,

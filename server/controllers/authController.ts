@@ -79,31 +79,91 @@ export const login = async (req: Request, res: Response) => {
 
 export const googleLogin = async (req: Request, res: Response) => {
   try {
-    const { token } = req.body;
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
+    const { credential, accessToken } = req.body;
+
+    if (!credential && !accessToken) {
+      console.warn('[Google Auth] Missing both credential and accessToken in request body');
+      return res.status(400).json({ message: 'Missing Google authentication data' });
+    }
+
+    let payload: any;
+
+    if (credential) {
+      // Verify ID Token (Credential flow)
+      try {
+        const ticket = await client.verifyIdToken({
+          idToken: credential,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        payload = ticket.getPayload();
+      } catch (verifyError: any) {
+        console.error('[Google Auth] ID Token verification failed:', verifyError.message);
+        return res.status(401).json({ message: 'Invalid ID token', details: verifyError.message });
+      }
+    } else if (accessToken) {
+      // Verify Access Token (Custom flow)
+      try {
+        const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info from Google');
+        }
+        payload = await response.json();
+      } catch (tokenError: any) {
+        console.error('[Google Auth] Access Token verification failed:', tokenError.message);
+        return res.status(401).json({ message: 'Invalid access token', details: tokenError.message });
+      }
+    }
 
     if (!payload || !payload.email) {
-      return res.status(400).json({ message: 'Invalid Google token' });
+      console.error('[Google Auth] Invalid payload structure:', payload);
+      return res.status(400).json({ message: 'Invalid Google authentication payload' });
     }
 
-    let user = await prisma.user.findUnique({ where: { email: payload.email } });
+    const { email, sub: googleId, name, picture: avatar } = payload;
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: payload.email,
-          isEmailVerified: true, // Google emails are verified
-          credits: 3, // Free credits
-          plan: 'FREE',
-        },
+    // 1. Try to find user by googleId
+    let user = await prisma.user.findUnique({ where: { googleId } });
+
+    if (user) {
+      // User exists by Google ID - update details if they changed
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { name: name || user.name, avatar: avatar || user.avatar },
       });
+    } else {
+      // 2. Try to find user by email (to link account if they previously used email/password)
+      user = await prisma.user.findUnique({ where: { email } });
+
+      if (user) {
+        // Link Google ID to existing email account
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            googleId,
+            isEmailVerified: true,
+            name: user.name || name,
+            avatar: user.avatar || avatar
+          },
+        });
+        console.log(`[Google Auth] Linked Google ID to existing user: ${email}`);
+      } else {
+        // 3. Create new user
+        user = await prisma.user.create({
+          data: {
+            email,
+            googleId,
+            name,
+            avatar,
+            isEmailVerified: true,
+            credits: 3, // Unified initial free credits
+            plan: 'FREE',
+          },
+        });
+        console.log(`[Google Auth] Created new user via Google: ${email}`);
+      }
     }
 
-    const accessToken = generateAccessToken(user.id, user.role);
+    const newAccessToken = generateAccessToken(user.id, user.role);
     const refreshToken = generateRefreshToken(user.id);
 
     await prisma.refreshToken.create({
@@ -116,10 +176,21 @@ export const googleLogin = async (req: Request, res: Response) => {
 
     setRefreshTokenCookie(res, refreshToken);
 
-    res.json({ accessToken, user: { id: user.id, email: user.email, role: user.role, credits: user.credits, plan: user.plan } });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.json({
+      accessToken: newAccessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        credits: user.credits,
+        plan: user.plan,
+        name: user.name,
+        avatar: user.avatar
+      }
+    });
+  } catch (error: any) {
+    console.error('[Google Auth] Unexpected Controller Error:', error);
+    res.status(500).json({ message: 'Google authentication failed', details: error.message });
   }
 };
 

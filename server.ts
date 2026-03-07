@@ -25,6 +25,7 @@ async function startServer() {
   app.use(helmet({
     contentSecurityPolicy: false, // Disable CSP for dev/iframe compatibility
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow OAuth popups to communicate back
   }));
 
   app.use(cors({

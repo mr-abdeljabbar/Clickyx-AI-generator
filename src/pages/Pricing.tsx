@@ -213,8 +213,17 @@ const Pricing = () => {
                     Authenticate to Upgrade
                   </Link>
                 ) : showButtons && plan.ncpId ? (
-                  <div className="relative group/btn w-full">
-                    <PayPalHostedButton hostedButtonId={plan.ncpId} />
+                  <div className="relative group/btn w-full mt-2">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-primary/20 to-emerald-500/20 rounded-xl blur opacity-75 group-hover/btn:opacity-100 transition duration-500 group-hover/btn:duration-200" />
+                    <div className="relative bg-[#0a0a0a] border border-white/10 hover:border-emerald-500/40 rounded-xl p-3 shadow-2xl transition-colors">
+                      <div className="flex items-center gap-2 mb-1 w-full justify-center border-b border-white/5 pb-2">
+                        <Shield className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        <span className="text-[10px] font-black text-emerald-400/80 uppercase tracking-widest whitespace-nowrap">Secure Gateway</span>
+                      </div>
+                      <div className="-mt-2 w-full relative z-10 flex justify-center">
+                        <PayPalHostedButton hostedButtonId={plan.ncpId} />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="h-[45px] mt-6 bg-white/5 rounded-lg animate-pulse flex items-center justify-center">
