@@ -19,11 +19,11 @@ COPY . .
 # Generate the Prima client
 RUN npx prisma generate
 
-# Build the Vite React frontend
-RUN npm run build
+# Note: We build the Vite frontend at runtime (in CMD) so it has access to CapRover's environment variables
+# RUN npm run build
 
 # Expose the port your Express backend uses (port 5000 is defined in your server.ts)
 EXPOSE 5000
 
-# Start the Node/Express backend process
-CMD ["npm", "run", "start"]
+# Build the Vite React frontend with the injected CapRover env vars, then start the Node/Express backend process
+CMD npm run build && npm run start
