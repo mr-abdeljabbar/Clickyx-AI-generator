@@ -1,5 +1,6 @@
 import serverless from 'serverless-http';
 import { app, configureApp } from '../../server';
+import prisma from '../../server/prisma';
 
 let serverlessHandler;
 

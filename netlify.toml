@@ -5,10 +5,13 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  PRISMA_CLIENT_ENGINE_TYPE = "library"
 
 [functions]
   directory = "netlify/functions"
   external_node_modules = ["lightningcss", "tailwindcss", "@tailwindcss/vite", "@tailwindcss/oxide"]
+  node_bundler = "esbuild"
+  included_files = ["node_modules/.prisma/client/*.node"]
 
 [[redirects]]
   from = "/api/*"
