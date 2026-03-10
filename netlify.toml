@@ -8,6 +8,7 @@
 
 [functions]
   directory = "netlify/functions"
+  external_node_modules = ["lightningcss", "tailwindcss", "@tailwindcss/vite", "@tailwindcss/oxide"]
 
 [[redirects]]
   from = "/api/*"
