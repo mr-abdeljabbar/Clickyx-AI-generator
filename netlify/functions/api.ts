@@ -4,9 +4,24 @@ import { app, configureApp } from '../../server';
 let serverlessHandler;
 
 export const handler = async (event: any, context: any) => {
-    if (!serverlessHandler) {
-        await configureApp();
-        serverlessHandler = serverless(app);
+    console.log(`[Netlify Function] Handling request for: ${event.path}`);
+    try {
+        if (!serverlessHandler) {
+            console.log('[Netlify Function] Initializing Express app...');
+            await configureApp();
+            serverlessHandler = serverless(app);
+            console.log('[Netlify Function] Express app initialized.');
+        }
+        return await serverlessHandler(event, context);
+    } catch (error: any) {
+        console.error('[Netlify Function] Error:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                message: 'Internal Server Error (Netlify Function)',
+                error: error.message,
+                stack: error.stack
+            })
+        };
     }
-    return serverlessHandler(event, context);
 };
