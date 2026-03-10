@@ -13,8 +13,18 @@ import adminRoutes from './server/routes/adminRoutes';
 // Load environment variables
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Use a safe way to get directory name in ESM/bundled environments
+let __filename;
+let __dirname;
+
+try {
+  __filename = fileURLToPath(import.meta.url);
+  __dirname = path.dirname(__filename);
+} catch (e) {
+  // Fallback for bundled/lambda environments where import.meta.url might be weird
+  __filename = process.cwd();
+  __dirname = process.cwd();
+}
 
 const app = express();
 
