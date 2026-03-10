@@ -17,8 +17,9 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function startServer() {
-  const app = express();
+const app = express();
+
+async function configureApp() {
   const PORT = Number(process.env.PORT) || 5000;
 
   // Security Middleware
@@ -47,13 +48,13 @@ async function startServer() {
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' && !process.env.NETLIFY) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (process.env.NODE_ENV === 'production') {
     // Serve static files in production
     app.use(express.static(path.join(__dirname, 'dist')));
     app.get('*', (req, res) => {
@@ -61,12 +62,21 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+// Export the app for serverless functions
+export { app, configureApp };
+
+// Only start the server if this file is run directly (not as a serverless function)
+if (import.meta.url === `file://${process.argv[1]}` || !process.env.NETLIFY_DEV && !process.env.NETLIFY) {
+  configureApp().then(() => {
+    const PORT = Number(process.env.PORT) || 5000;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }).catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}
