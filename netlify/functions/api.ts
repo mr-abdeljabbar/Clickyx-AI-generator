@@ -10,6 +10,15 @@ export const handler = async (event: any, context: any) => {
         if (!serverlessHandler) {
             console.log('[Netlify Function] Initializing Express app...');
             await configureApp();
+
+            console.log('[Netlify Function] Verifying Database connection...');
+            try {
+                await prisma.$connect();
+                console.log('[Netlify Function] Database connected successfully.');
+            } catch (dbError: any) {
+                console.error('[Netlify Function] Database CONNECTION FAILED:', dbError.message);
+            }
+
             serverlessHandler = serverless(app);
             console.log('[Netlify Function] Express app initialized.');
         }
